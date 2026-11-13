@@ -1,0 +1,6 @@
+{
+  "name": "ApexFX",
+  "description": "Smart Money Concepts (SMC) Forex & CFD terminal with real-time feeds, order block & liquidity sweep push alerts (3 TPs + 1.5x ATR trailing stop), session POC volume profile, lot size/R:R calculator, volatility & backtesting labs, and an AI-coached cloud trade journal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

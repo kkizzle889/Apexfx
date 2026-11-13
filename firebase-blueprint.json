@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "A logged Forex or CFD trade with entry/exit levels, R:R ratios, duration, and Smart Money Concepts adherence flags.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID." },
+        "symbol": { "type": "string", "description": "Instrument ticker symbol (e.g. XAU/USD)." },
+        "direction": { "type": "string", "enum": ["LONG", "SHORT"] },
+        "session": { "type": "string", "enum": ["ASIA", "LONDON", "NEW_YORK", "LONDON_NY_OVERLAP"] },
+        "timeframe": { "type": "string", "enum": ["1m", "5m", "15m", "1H", "4H"] },
+        "setupTag": { "type": "string", "description": "Primary SMC setup label." },
+        "entryPrice": { "type": "number" },
+        "exitPrice": { "type": "number" },
+        "stopLoss": { "type": "number" },
+        "takeProfit1": { "type": "number" },
+        "takeProfit2": { "type": "number" },
+        "takeProfit3": { "type": "number" },
+        "lotSize": { "type": "number" },
+        "riskPercent": { "type": "number" },
+        "plannedRr": { "type": "number" },
+        "realizedRr": { "type": "number" },
+        "pnlUsd": { "type": "number" },
+        "durationMinutes": { "type": "integer" },
+        "atrMultiplier": { "type": "number" },
+        "usedOrderBlock": { "type": "boolean" },
+        "usedLiquiditySweep": { "type": "boolean" },
+        "usedFvg": { "type": "boolean" },
+        "usedStructureBreak": { "type": "boolean" },
+        "alignedWithPoc": { "type": "boolean" },
+        "inKillzone": { "type": "boolean" },
+        "followedAtrTrail": { "type": "boolean" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server timestamp on creation." },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server timestamp on update." }
+      },
+      "required": [
+        "userId", "symbol", "direction", "session", "timeframe", "setupTag",
+        "entryPrice", "exitPrice", "stopLoss", "takeProfit1", "takeProfit2", "takeProfit3",
+        "lotSize", "riskPercent", "plannedRr", "realizedRr", "pnlUsd", "durationMinutes",
+        "atrMultiplier", "usedOrderBlock", "usedLiquiditySweep", "usedFvg",
+        "usedStructureBreak", "alignedWithPoc", "inKillzone", "followedAtrTrail",
+        "notes", "createdAt", "updatedAt"
+      ]
+    },
+    "SmcSettings": {
+      "title": "SmcSettings",
+      "description": "User preferences for Smart Money Concepts chart overlays, push notification triggers, and default risk management.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "showOrderBlocks": { "type": "boolean" },
+        "showFvg": { "type": "boolean" },
+        "showLiquiditySweeps": { "type": "boolean" },
+        "showStructureBreaks": { "type": "boolean" },
+        "showSessionPoc": { "type": "boolean" },
+        "showKillzones": { "type": "boolean" },
+        "showAtrBands": { "type": "boolean" },
+        "enablePushNotifications": { "type": "boolean" },
+        "alertLiquiditySweeps": { "type": "boolean" },
+        "alertOrderBlockRetest": { "type": "boolean" },
+        "alertMultiConfluenceEntry": { "type": "boolean" },
+        "autoAnalyzeJournal": { "type": "boolean" },
+        "accountBalance": { "type": "number" },
+        "defaultRiskPercent": { "type": "number" },
+        "defaultAtrMultiplier": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "showOrderBlocks", "showFvg", "showLiquiditySweeps",
+        "showStructureBreaks", "showSessionPoc", "showKillzones", "showAtrBands",
+        "enablePushNotifications", "alertLiquiditySweeps", "alertOrderBlockRetest",
+        "alertMultiConfluenceEntry", "autoAnalyzeJournal", "accountBalance",
+        "defaultRiskPercent", "defaultAtrMultiplier", "createdAt", "updatedAt"
+      ]
+    },
+    "SavedSignal": {
+      "title": "SavedSignal",
+      "description": "Detected SMC trading signal with entry, 3 TP levels, and 1.5x ATR trailing stop.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "symbol": { "type": "string" },
+        "direction": { "type": "string", "enum": ["LONG", "SHORT"] },
+        "timeframe": { "type": "string" },
+        "session": { "type": "string" },
+        "setupSummary": { "type": "string" },
+        "entryPrice": { "type": "number" },
+        "initialStopLoss": { "type": "number" },
+        "atrTrailingStop15": { "type": "number" },
+        "atrTrailingStop10": { "type": "number" },
+        "atrValue": { "type": "number" },
+        "tp1": { "type": "number" },
+        "tp2": { "type": "number" },
+        "tp3": { "type": "number" },
+        "rrTp3": { "type": "number" },
+        "confidence": { "type": "integer" },
+        "status": { "type": "string", "enum": ["ACTIVE", "LOGGED", "DISMISSED"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "symbol", "direction", "timeframe", "session", "setupSummary",
+        "entryPrice", "initialStopLoss", "atrTrailingStop15", "atrTrailingStop10",
+        "atrValue", "tp1", "tp2", "tp3", "rrTp3", "confidence", "status",
+        "createdAt", "updatedAt"
+      ]
+    },
+    "AiPerformanceReport": {
+      "title": "AiPerformanceReport",
+      "description": "Gemini AI Logic trade journal audit covering patterns, mistakes, winning strategies, and SMC adherence.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "tradesAnalyzed": { "type": "integer" },
+        "smcAdherenceScore": { "type": "integer" },
+        "overallSummary": { "type": "string" },
+        "entryExitAnalysis": { "type": "string" },
+        "rrEfficiencySummary": { "type": "string" },
+        "durationInsight": { "type": "string" },
+        "recurringPatterns": { "type": "array" },
+        "commonMistakes": { "type": "array" },
+        "successfulStrategies": { "type": "array" },
+        "recommendations": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "userId", "tradesAnalyzed", "smcAdherenceScore", "overallSummary",
+        "entryExitAnalysis", "rrEfficiencySummary", "durationInsight",
+        "recurringPatterns", "commonMistakes", "successfulStrategies",
+        "recommendations", "createdAt", "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/journal_entries/{entryId}": {
+      "schema": { "$ref": "#/entities/JournalEntry" },
+      "description": "Authenticated user's logged trades and SMC compliance metrics."
+    },
+    "/users/{userId}/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/SmcSettings" },
+      "description": "Authenticated user's SMC toggle configuration, notification preferences, and default risk profile."
+    },
+    "/users/{userId}/signal_history/{signalId}": {
+      "schema": { "$ref": "#/entities/SavedSignal" },
+      "description": "Authenticated user's persisted real-time trading signals with 3 TP levels and 1.5x ATR trailing stop."
+    },
+    "/users/{userId}/ai_reports/{reportId}": {
+      "schema": { "$ref": "#/entities/AiPerformanceReport" },
+      "description": "Authenticated user's AI-generated trade journal performance reports."
+    }
+  }
+}

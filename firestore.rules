@@ -1,0 +1,247 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidStringList(val, maxItems) {
+      return val is list && val.size() <= maxItems && (val.size() == 0 || val[0] is string);
+    }
+
+    function isValidJournalEntry(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.symbol is string && data.symbol.size() >= 1 && data.symbol.size() <= 24 &&
+             data.direction in ['LONG', 'SHORT'] &&
+             data.session in ['ASIA', 'LONDON', 'NEW_YORK', 'LONDON_NY_OVERLAP'] &&
+             data.timeframe in ['1m', '5m', '15m', '1H', '4H'] &&
+             data.setupTag is string && data.setupTag.size() >= 1 && data.setupTag.size() <= 60 &&
+             data.entryPrice is number && data.entryPrice > 0 &&
+             data.exitPrice is number && data.exitPrice > 0 &&
+             data.stopLoss is number && data.stopLoss > 0 &&
+             data.takeProfit1 is number && data.takeProfit1 > 0 &&
+             data.takeProfit2 is number && data.takeProfit2 > 0 &&
+             data.takeProfit3 is number && data.takeProfit3 > 0 &&
+             data.lotSize is number && data.lotSize > 0 && data.lotSize <= 1000 &&
+             data.riskPercent is number && data.riskPercent > 0 && data.riskPercent <= 50 &&
+             data.plannedRr is number && data.plannedRr >= 0 && data.plannedRr <= 100 &&
+             data.realizedRr is number && data.realizedRr >= -50 && data.realizedRr <= 100 &&
+             data.pnlUsd is number &&
+             data.durationMinutes is int && data.durationMinutes >= 0 && data.durationMinutes <= 43200 &&
+             data.atrMultiplier is number && data.atrMultiplier >= 0.5 && data.atrMultiplier <= 5.0 &&
+             data.usedOrderBlock is bool &&
+             data.usedLiquiditySweep is bool &&
+             data.usedFvg is bool &&
+             data.usedStructureBreak is bool &&
+             data.alignedWithPoc is bool &&
+             data.inKillzone is bool &&
+             data.followedAtrTrail is bool &&
+             data.notes is string && data.notes.size() <= 1000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSmcSettings(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.showOrderBlocks is bool &&
+             data.showFvg is bool &&
+             data.showLiquiditySweeps is bool &&
+             data.showStructureBreaks is bool &&
+             data.showSessionPoc is bool &&
+             data.showKillzones is bool &&
+             data.showAtrBands is bool &&
+             data.enablePushNotifications is bool &&
+             data.alertLiquiditySweeps is bool &&
+             data.alertOrderBlockRetest is bool &&
+             data.alertMultiConfluenceEntry is bool &&
+             data.autoAnalyzeJournal is bool &&
+             data.accountBalance is number && data.accountBalance > 0 && data.accountBalance <= 100000000 &&
+             data.defaultRiskPercent is number && data.defaultRiskPercent >= 0.1 && data.defaultRiskPercent <= 10.0 &&
+             data.defaultAtrMultiplier is number && (data.defaultAtrMultiplier == 1.0 || data.defaultAtrMultiplier == 1.5) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSavedSignal(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.symbol is string && data.symbol.size() >= 1 && data.symbol.size() <= 24 &&
+             data.direction in ['LONG', 'SHORT'] &&
+             data.timeframe is string && data.timeframe.size() >= 1 && data.timeframe.size() <= 12 &&
+             data.session is string && data.session.size() >= 1 && data.session.size() <= 40 &&
+             data.setupSummary is string && data.setupSummary.size() >= 1 && data.setupSummary.size() <= 160 &&
+             data.entryPrice is number && data.entryPrice > 0 &&
+             data.initialStopLoss is number && data.initialStopLoss > 0 &&
+             data.atrTrailingStop15 is number && data.atrTrailingStop15 > 0 &&
+             data.atrTrailingStop10 is number && data.atrTrailingStop10 > 0 &&
+             data.atrValue is number && data.atrValue >= 0 &&
+             data.tp1 is number && data.tp1 > 0 &&
+             data.tp2 is number && data.tp2 > 0 &&
+             data.tp3 is number && data.tp3 > 0 &&
+             data.rrTp3 is number && data.rrTp3 > 0 &&
+             data.confidence is int && data.confidence >= 0 && data.confidence <= 100 &&
+             data.status in ['ACTIVE', 'LOGGED', 'DISMISSED'] &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAiReport(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.tradesAnalyzed is int && data.tradesAnalyzed >= 0 && data.tradesAnalyzed <= 10000 &&
+             data.smcAdherenceScore is int && data.smcAdherenceScore >= 0 && data.smcAdherenceScore <= 100 &&
+             data.overallSummary is string && data.overallSummary.size() >= 1 && data.overallSummary.size() <= 2000 &&
+             data.entryExitAnalysis is string && data.entryExitAnalysis.size() >= 1 && data.entryExitAnalysis.size() <= 2000 &&
+             data.rrEfficiencySummary is string && data.rrEfficiencySummary.size() >= 1 && data.rrEfficiencySummary.size() <= 2000 &&
+             data.durationInsight is string && data.durationInsight.size() >= 1 && data.durationInsight.size() <= 2000 &&
+             isValidStringList(data.recurringPatterns, 10) &&
+             isValidStringList(data.commonMistakes, 10) &&
+             isValidStringList(data.successfulStrategies, 10) &&
+             isValidStringList(data.recommendations, 10) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId}/journal_entries/{entryId} {
+      allow get: if isOwner(userId) && isValidId(entryId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(entryId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'symbol', 'direction', 'session', 'timeframe', 'setupTag',
+                         'entryPrice', 'exitPrice', 'stopLoss', 'takeProfit1', 'takeProfit2', 'takeProfit3',
+                         'lotSize', 'riskPercent', 'plannedRr', 'realizedRr', 'pnlUsd', 'durationMinutes',
+                         'atrMultiplier', 'usedOrderBlock', 'usedLiquiditySweep', 'usedFvg',
+                         'usedStructureBreak', 'alignedWithPoc', 'inKillzone', 'followedAtrTrail',
+                         'notes', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'symbol', 'direction', 'session', 'timeframe', 'setupTag',
+                         'entryPrice', 'exitPrice', 'stopLoss', 'takeProfit1', 'takeProfit2', 'takeProfit3',
+                         'lotSize', 'riskPercent', 'plannedRr', 'realizedRr', 'pnlUsd', 'durationMinutes',
+                         'atrMultiplier', 'usedOrderBlock', 'usedLiquiditySweep', 'usedFvg',
+                         'usedStructureBreak', 'alignedWithPoc', 'inKillzone', 'followedAtrTrail',
+                         'notes', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidJournalEntry(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(entryId) &&
+                       isValidJournalEntry(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'symbol', 'direction', 'session', 'timeframe', 'setupTag',
+                         'entryPrice', 'exitPrice', 'stopLoss', 'takeProfit1', 'takeProfit2', 'takeProfit3',
+                         'lotSize', 'riskPercent', 'plannedRr', 'realizedRr', 'pnlUsd', 'durationMinutes',
+                         'atrMultiplier', 'usedOrderBlock', 'usedLiquiditySweep', 'usedFvg',
+                         'usedStructureBreak', 'alignedWithPoc', 'inKillzone', 'followedAtrTrail',
+                         'notes', 'updatedAt'
+                       ]);
+      allow delete: if isOwner(userId) && isValidId(entryId);
+    }
+
+    match /users/{userId}/settings/{settingId} {
+      allow get: if isOwner(userId) && isValidId(settingId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(settingId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'showOrderBlocks', 'showFvg', 'showLiquiditySweeps',
+                         'showStructureBreaks', 'showSessionPoc', 'showKillzones', 'showAtrBands',
+                         'enablePushNotifications', 'alertLiquiditySweeps', 'alertOrderBlockRetest',
+                         'alertMultiConfluenceEntry', 'autoAnalyzeJournal', 'accountBalance',
+                         'defaultRiskPercent', 'defaultAtrMultiplier', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'showOrderBlocks', 'showFvg', 'showLiquiditySweeps',
+                         'showStructureBreaks', 'showSessionPoc', 'showKillzones', 'showAtrBands',
+                         'enablePushNotifications', 'alertLiquiditySweeps', 'alertOrderBlockRetest',
+                         'alertMultiConfluenceEntry', 'autoAnalyzeJournal', 'accountBalance',
+                         'defaultRiskPercent', 'defaultAtrMultiplier', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSmcSettings(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(settingId) &&
+                       isValidSmcSettings(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'showOrderBlocks', 'showFvg', 'showLiquiditySweeps',
+                         'showStructureBreaks', 'showSessionPoc', 'showKillzones', 'showAtrBands',
+                         'enablePushNotifications', 'alertLiquiditySweeps', 'alertOrderBlockRetest',
+                         'alertMultiConfluenceEntry', 'autoAnalyzeJournal', 'accountBalance',
+                         'defaultRiskPercent', 'defaultAtrMultiplier', 'updatedAt'
+                       ]);
+      allow delete: if isOwner(userId) && isValidId(settingId);
+    }
+
+    match /users/{userId}/signal_history/{signalId} {
+      allow get: if isOwner(userId) && isValidId(signalId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(signalId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'symbol', 'direction', 'timeframe', 'session', 'setupSummary',
+                         'entryPrice', 'initialStopLoss', 'atrTrailingStop15', 'atrTrailingStop10',
+                         'atrValue', 'tp1', 'tp2', 'tp3', 'rrTp3', 'confidence', 'status',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'symbol', 'direction', 'timeframe', 'session', 'setupSummary',
+                         'entryPrice', 'initialStopLoss', 'atrTrailingStop15', 'atrTrailingStop10',
+                         'atrValue', 'tp1', 'tp2', 'tp3', 'rrTp3', 'confidence', 'status',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidSavedSignal(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(signalId) &&
+                       isValidSavedSignal(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(signalId);
+    }
+
+    match /users/{userId}/ai_reports/{reportId} {
+      allow get: if isOwner(userId) && isValidId(reportId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(reportId) &&
+                       incoming().keys().hasAll([
+                         'userId', 'tradesAnalyzed', 'smcAdherenceScore', 'overallSummary',
+                         'entryExitAnalysis', 'rrEfficiencySummary', 'durationInsight',
+                         'recurringPatterns', 'commonMistakes', 'successfulStrategies',
+                         'recommendations', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'tradesAnalyzed', 'smcAdherenceScore', 'overallSummary',
+                         'entryExitAnalysis', 'rrEfficiencySummary', 'durationInsight',
+                         'recurringPatterns', 'commonMistakes', 'successfulStrategies',
+                         'recommendations', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidAiReport(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(reportId) &&
+                       isValidAiReport(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'tradesAnalyzed', 'smcAdherenceScore', 'overallSummary',
+                         'entryExitAnalysis', 'rrEfficiencySummary', 'durationInsight',
+                         'recurringPatterns', 'commonMistakes', 'successfulStrategies',
+                         'recommendations', 'updatedAt'
+                       ]);
+      allow delete: if isOwner(userId) && isValidId(reportId);
+    }
+  }
+}
